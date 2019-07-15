@@ -2,6 +2,7 @@ package com.belatrix.parsemainpage.app.processor;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,14 +10,15 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
-
-import com.belatrix.parsemainpage.app.controller.SearchPartternsController;
 
 /**
  * Log handling for processor file
@@ -26,8 +28,7 @@ import com.belatrix.parsemainpage.app.controller.SearchPartternsController;
 @Component
 public class FileListWebSiteProcessorImpl implements IFileListWebSiteProcessor {
   
-	private final String PATH_BASE = "C:\\Users\\SAID HERNANDEZ\\Documents\\Belatrix\\reportes";
-	
+
 	@Value("classpath:SetListDefault.txt")
 	Resource resourceFile;
     
@@ -57,26 +58,22 @@ public class FileListWebSiteProcessorImpl implements IFileListWebSiteProcessor {
      * @see com.belatrix.parsemainpage.app.processor.IFileListWebSiteProcessor#reportHashTagFile(java.util.Map)
      */
 	@Override
-	public boolean reportHashTagFile(Map<String, List<String>> mapHashTag) {
+	public boolean reportHashTagFile(Map<String, List<String>> mapHashTag, HttpServletResponse response) {
 		logger.info("Inicio del metodo - reportHashTagFile");
-		String fileSeparator = System.getProperty("file.separator");
-		logger.debug("El separador del sistema es: " +fileSeparator);
-
+		ArrayList<File> files = new ArrayList<>();
 		if (mapHashTag != null) {
-			mapHashTag.entrySet().forEach(x -> {
-				String absoluteFilePath = PATH_BASE.concat(fileSeparator).concat(x.getKey()).concat(".txt");
-				logger.debug("Ruta absoluta del archivo: " +absoluteFilePath);
-
-				File file = new File(absoluteFilePath);
-				try (FileOutputStream fop = new FileOutputStream(file)) {
-					if (!file.exists()) {
-						logger.info("El archivo no existe se procede a crear");
-						file.createNewFile();
-					}
-					logger.debug("Escribiendo linea..." );
-					x.getValue().forEach(i -> {
+			try {
+				response.setStatus(HttpServletResponse.SC_OK);
+				response.addHeader("Content-Disposition", "attachment; filename=\"ResultReportHash.zip\"");
+				ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream());
+				for (Map.Entry<String, List<String>> entry : mapHashTag.entrySet()) {
+					String absoluteFilePath = entry.getKey().concat(".txt");
+					logger.debug("Ruta absoluta del archivo: " + absoluteFilePath);
+					File file = new File(absoluteFilePath);
+					FileOutputStream fop = new FileOutputStream(file);
+					logger.debug("Escribiendo linea...");
+					entry.getValue().forEach(i -> {
 						try {
-							logger.debug("Linea: " +i );
 							fop.write(i.getBytes());
 							fop.write("\r\n".getBytes());
 						} catch (IOException e) {
@@ -85,13 +82,20 @@ public class FileListWebSiteProcessorImpl implements IFileListWebSiteProcessor {
 						}
 					});
 					fop.flush();
-				} catch (IOException e) {
-					logger.error("Se presento error creando el archivo ");
-					logger.error("Causa: " + e.getMessage());
+					fop.close();
+					files.add(file);
 				}
-			});
-			logger.info("Se procesa el reporte correctamente");
-			return true;
+				for (File file : files) {
+			        zipOutputStream.putNextEntry(new ZipEntry(file.getName()));
+			        FileInputStream fileInputStream = new FileInputStream(file);
+			        IOUtils.copy(fileInputStream, zipOutputStream);
+			        fileInputStream.close();
+			        zipOutputStream.closeEntry();
+			    }    
+			    zipOutputStream.close();
+			} catch (IOException e1) {
+				logger.error("Se presento error construyendo el zip Causa: " + e1.getMessage());
+			}
 		}
 		return false;
 	}

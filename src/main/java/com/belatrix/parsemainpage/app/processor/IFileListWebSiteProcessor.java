@@ -3,6 +3,8 @@ package com.belatrix.parsemainpage.app.processor;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -30,6 +32,6 @@ public interface IFileListWebSiteProcessor {
 	 * @param mapHashTag
 	 * @return
 	 */
-	public boolean reportHashTagFile(Map<String, List<String>> mapHashTag); 
+	public boolean reportHashTagFile(Map<String, List<String>> mapHashTag, HttpServletResponse response); 
 
 }

@@ -2,6 +2,9 @@ package com.belatrix.parsemainpage.app.business;
 
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipOutputStream;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,7 +24,7 @@ public class SearchPartternsBusinessImpl implements ISearchPartternsBusiness {
 	 * @see com.belatrix.parsemainpage.app.business.ISearchPartternsBusiness#findPatterns(com.belatrix.parsemainpage.app.processor.ISearchPartternsProcessor)
 	 */
 	@Override
-	public void findPatterns(ISearchPartternsProcessor iSearchPartternsProcessor) {
+	public void findPatterns(ISearchPartternsProcessor iSearchPartternsProcessor, HttpServletResponse response) {
 		try {
 			logger.info("Inicio del metodo - findPatterns");
 			
@@ -31,8 +34,8 @@ public class SearchPartternsBusinessImpl implements ISearchPartternsBusiness {
 			Map<String, List<String>> mapHashTag = iSearchPartternsProcessor.findPatterns(urlsWebSite);
 			logger.info("Se procesa las url y se relacionan en el map: " + mapHashTag.size());
 			
-			boolean response = fileListWebSiteProcessor.reportHashTagFile(mapHashTag);
-			logger.info("Se genera el reporte en sus respetivos archivos: " + response );
+			boolean responseFile = fileListWebSiteProcessor.reportHashTagFile(mapHashTag, response);
+			logger.info("Se genera el reporte en sus respetivos archivos: " + responseFile );
 		} catch (Exception e) {
 			logger.error("Error presentado en la capa de negocio: " + e.getMessage());
 		}

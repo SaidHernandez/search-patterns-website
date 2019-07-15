@@ -2,6 +2,8 @@ package com.belatrix.parsemainpage.app.business;
 
 
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
@@ -23,6 +25,6 @@ public interface ISearchPartternsBusiness {
 	 * Finding the patterns without website.
 	 * @param iSearchPartternsProcessor
 	 */
-	public void findPatterns(ISearchPartternsProcessor iSearchPartternsProcessor) ;
+	public void findPatterns(ISearchPartternsProcessor iSearchPartternsProcessor, HttpServletResponse response) ;
 
 }

@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.belatrix.parsemainpage.app.business.ISearchPartternsBusiness;
+
 
 /**
  * 
@@ -18,7 +18,7 @@ import com.belatrix.parsemainpage.app.business.ISearchPartternsBusiness;
 public interface IFileListWebSiteProcessor {
 	
 	/** application log */
-	public static final Logger logger = LogManager.getLogger(ISearchPartternsBusiness.class);
+	public static final Logger logger = LogManager.getLogger(IFileListWebSiteProcessor.class);
 	
 	/**
 	 * Read file locally and return web site lists
